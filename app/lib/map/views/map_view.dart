@@ -44,6 +44,8 @@ class MapsPage extends StatelessWidget {
               }).toSet(),
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
+              compassEnabled: true,
+              mapType: MapType.terrain,
             );
           }
         },
