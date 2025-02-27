@@ -14,7 +14,7 @@ body {
     height: 100vh;
     text-align: center;
     background-color: white;
-    overflow: hidden; 
+    /* overflow: hidden;  */
 }
 
 .header {
@@ -24,9 +24,9 @@ body {
     gap: 10px;
     width: 100%;
     padding: 10px;
-    position: absolute;
+    /* position: absolute;
     top: 0;
-    left: 0;
+    left: 0; */
 }
 
 .logo {
