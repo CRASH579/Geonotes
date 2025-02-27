@@ -20,6 +20,7 @@ void main() async {
     SystemChrome.restoreSystemUIOverlays();
   });
   runApp(MultiProvider(providers: [
+    // Helo
     ChangeNotifierProvider(create: (context) => NotesProvider()),
     ChangeNotifierProvider(create: (context) => AuthProvider()),
     ChangeNotifierProvider(create: (context) => AddNoteProvider()),
