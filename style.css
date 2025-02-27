@@ -1,0 +1,120 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    background-color: white;
+    overflow: hidden; 
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+}
+
+.logotext {
+    font-size: 30px;
+    font-weight: 600;
+    color: #333;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 90vw;
+    height: 80vh;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 16px;
+    margin-bottom: 20px;
+    max-width: 800px;
+}
+
+.images {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.images img {
+    max-width: 200px;
+    height: auto;
+}
+
+.about {
+    font-size: 22px;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.about-text {
+    font-size: 16px;
+    max-width: 800px;
+    margin-bottom: 20px;
+}
+
+.download img {
+    width: 200px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.fotter {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    background-color: #00ffb4;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+
+@media (max-width: 768px) {
+    .images img {
+        max-width: 150px;
+    }
+    .description, .about-text {
+        font-size: 14px;
+    }
+    .title {
+        font-size: 24px;
+    }
+    .about {
+        font-size: 18px;
+    }
+}
