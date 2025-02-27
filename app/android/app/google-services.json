@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "510491987865",
+    "project_id": "geonotes-8424e",
+    "storage_bucket": "geonotes-8424e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510491987865:android:610218b9587fd407864d08",
+        "android_client_info": {
+          "package_name": "com.example.geonotes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-NftPK9CGrsnLeAYF64uZfTRa01nK7og"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
