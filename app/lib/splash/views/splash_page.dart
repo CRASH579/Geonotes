@@ -54,7 +54,7 @@ class SplashPage extends StatelessWidget {
       case 0:
         return const HomePage();
       case 1:
-        return const MapsPage();
+        return MapsPage();
       case 2:
         return const Center(child: Text('Friends Page'));
       default:

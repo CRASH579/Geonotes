@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geonotes/home/model/note_model.dart';
 
 class NoteCard extends StatelessWidget {
-  final String note;
+  final Note note;
   final double distanceText;
   const NoteCard({super.key, required this.note, required this.distanceText});
 
@@ -17,7 +18,7 @@ class NoteCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                note,
+                note.text,
                 style: const TextStyle(
                     fontSize: 14, fontFamily: 'Poppins', color: Colors.black),
               ),

@@ -1,11 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:geonotes/home/providers/notes_provider.dart';
+import 'package:label_marker/label_marker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapsPage extends StatelessWidget {
-  const MapsPage({super.key});
+  MapsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +21,13 @@ class MapsPage extends StatelessWidget {
                 notesProvider.updatePosition(notesProvider.currentPosition!);
               },
               initialCameraPosition: CameraPosition(
-                target: LatLng(
-                  notesProvider.currentPosition!.latitude,
-                  notesProvider.currentPosition!.longitude,
-                ),
+                target: (notesProvider.latLng == null)
+                    ? LatLng(
+                        notesProvider.currentPosition!.latitude,
+                        notesProvider.currentPosition!.longitude,
+                      )
+                    : LatLng(notesProvider.latLng!.latitude,
+                        notesProvider.latLng!.longitude),
                 zoom: 14.0,
               ),
               markers: notesProvider.allNotes.map((note) {
@@ -46,6 +50,7 @@ class MapsPage extends StatelessWidget {
               myLocationButtonEnabled: true,
               compassEnabled: true,
               mapType: MapType.terrain,
+              buildingsEnabled: true,
             );
           }
         },

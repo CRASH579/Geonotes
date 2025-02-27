@@ -4,7 +4,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geonotes/home/providers/add_note_provider.dart';
 import 'package:geonotes/home/providers/notes_provider.dart';
 import 'package:geonotes/home/widgets/note_card.dart';
+import 'package:geonotes/splash/providers/splash_page_provider.dart';
 import 'package:geonotes/utils/styles.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
@@ -13,6 +15,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final addNoteProvider = Provider.of<AddNoteProvider>(context);
+    final splashPageProvider = Provider.of<SplashPageProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -75,8 +78,18 @@ class HomePage extends StatelessWidget {
                       note.location.longitude,
                     );
 
-                    return NoteCard(
-                        note: note.text, distanceText: distanceInMeters);
+                    return InkWell(
+                      onTap: () {
+                        notesProvider.latLng = LatLng(
+                            note.location.latitude, note.location.longitude);
+                        splashPageProvider.selectTab(1);
+                        // notesProvider.latLng = null;
+                      },
+                      child: NoteCard(
+                        note: note,
+                        distanceText: distanceInMeters,
+                      ),
+                    );
                   },
                 ),
               );
