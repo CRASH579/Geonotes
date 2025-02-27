@@ -79,11 +79,13 @@ class HomePage extends StatelessWidget {
                     );
 
                     return InkWell(
-                      onTap: () {
+                      onTap: () async {
                         notesProvider.latLng = LatLng(
                             note.location.latitude, note.location.longitude);
                         splashPageProvider.selectTab(1);
-                        // notesProvider.latLng = null;
+                        await Future.delayed(const Duration(seconds: 1), () {
+                          notesProvider.latLng = null;
+                        });
                       },
                       child: NoteCard(
                         note: note,
