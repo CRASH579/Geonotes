@@ -9,8 +9,22 @@ import 'package:geonotes/utils/styles.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize data when the page is first created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<NotesProvider>(context, listen: false).initializeData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +73,7 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.only(top: 32.0),
         child: Consumer<NotesProvider>(
           builder: (context, notesProvider, child) {
-            notesProvider.fetchNearbyNotes();
+            // notesProvider.fetchNearbyNotes();
             if (notesProvider.currentPosition == null) {
               return const Center(child: CircularProgressIndicator());
             } else if (notesProvider.nearbyNotes.isEmpty) {

@@ -5,9 +5,15 @@ import 'package:label_marker/label_marker.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class MapsPage extends StatelessWidget {
-  MapsPage({super.key});
+class MapsPage extends StatefulWidget {
+  const MapsPage({super.key});
 
+  @override
+  State<MapsPage> createState() => _MapsPageState();
+}
+
+class _MapsPageState extends State<MapsPage> {
+  GoogleMapController? _mapController;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +24,13 @@ class MapsPage extends StatelessWidget {
           } else {
             return GoogleMap(
               onMapCreated: (controller) {
-                notesProvider.updatePosition(notesProvider.currentPosition!);
+                _mapController = controller;
+                if (notesProvider.latLng != null) {
+                  controller.animateCamera(
+                    CameraUpdate.newLatLng(notesProvider.latLng!),
+                  );
+                }
+                // notesProvider.updatePosition(notesProvider.currentPosition!);
               },
               initialCameraPosition: CameraPosition(
                 target: (notesProvider.latLng == null)
@@ -51,10 +63,17 @@ class MapsPage extends StatelessWidget {
               compassEnabled: true,
               mapType: MapType.terrain,
               buildingsEnabled: true,
+              zoomControlsEnabled: false,
             );
           }
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
   }
 }

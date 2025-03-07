@@ -14,6 +14,15 @@ class NotesProvider with ChangeNotifier {
   List<Note> get allNotes => _allNotes;
   List<Note> get nearbyNotes => _nearbyNotes;
 
+  bool _isInitialized = false;
+
+  Future<void> initializeData() async {
+    if (!_isInitialized) {
+      await fetchNearbyNotes();
+      _isInitialized = true;
+    }
+  }
+
   Future<void> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
