@@ -63,7 +63,7 @@ class _MapsPageState extends State<MapsPage> {
               compassEnabled: true,
               mapType: MapType.terrain,
               buildingsEnabled: true,
-              zoomControlsEnabled: false,
+              zoomControlsEnabled: true,
             );
           }
         },

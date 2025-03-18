@@ -47,14 +47,40 @@ class NotesProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllNotes() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('notes').get();
+    QuerySnapshot users = await FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', isEqualTo: 'zqFHp4cM8IgNprxbMSBtyVHY6xv2')
+        .get();
 
-    List<Note> notes = snapshot.docs.map((doc) {
+    List<String> allFriends = [];
+
+    for (var userDoc in users.docs) {
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+      List<dynamic> friends = userData['friends'];
+      List<String> activeFriends = friends
+          .where((friend) => friend['status'] == true)
+          .map((friend) => friend['uid'] as String)
+          .toList();
+      allFriends.addAll(activeFriends);
+    }
+
+    QuerySnapshot notess = await FirebaseFirestore.instance
+        .collection('test-notes')
+        .where('uid', whereIn: allFriends)
+        .get();
+
+    // print(allFriends);
+
+    // QuerySnapshot snapshot =
+    //     await FirebaseFirestore.instance.collection('notes').get();
+
+    // print("Notes : ${notess.docs.map((doc) => doc.data()).join(', ')}");
+
+    List<Note> notes = notess.docs.map((doc) {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       GeoPoint geoPoint = doc['location'];
       return Note(
-          text: data.containsKey('text') ? data['text'] : '',
+          text: data.containsKey('title') ? data['title'] : '',
           timestamp: (data['timestamp'] as Timestamp).toDate(),
           location: Position(
               longitude: geoPoint.longitude,
@@ -83,7 +109,7 @@ class NotesProvider with ChangeNotifier {
           note.location.latitude,
           note.location.longitude,
         );
-        return distanceInMeters <= 15000; // Fetch notes within 15km
+        return distanceInMeters <= 150000000; // Fetch notes within 15km
       }).toList();
 
       _nearbyNotes.sort((a, b) {
