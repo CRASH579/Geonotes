@@ -1,11 +1,14 @@
 import Logo from "@/assets/logo.svg";
 export const Home = () => {
   return (
-    <section>
-      <a href="https://geonotes.in" target="_blank">
-        <img src={Logo} className="h-50" alt="React logo" />
-      </a>
-      <h1>Geonotes</h1>
+    <section className="flex flex-col justify-center mx-10 my-22 items-center text-center gap-6 max-w-5xl">
+      <div className="flex gap-2 items-center">
+        <a href="https://geonotes.in" target="_blank" className="min-w-10">
+          <img src={Logo} className="h-25" alt="React logo" />
+        </a>
+        <h1>Geonotes</h1>
+      </div>
+
       <h2>Welcome to Geonotes</h2>
       <p>
         Discover a new way to interact with your surroundings. Geonotes allows
