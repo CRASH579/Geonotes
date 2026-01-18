@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* -------------------------
+   THEME TOKENS (Tailwind v4)
+   ------------------------- */
+@theme {
+  /* Override default sans font */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Brand */
+  --color-brand: #00feb5;
+  --color-brand-text: #94e2d5;
+  --color-pill: #1e1e2e;
+  
+  /* Dark-first palette */
+  --color-bg: #11111b;
+  --color-surface: #181825;
+  --color-surface-2: #1e1e2e;
+  --color-text: #cdd6f4;
+  --color-muted: #a6adc8;
+  --color-border: #b4befe;
+  --color-light: #cdd6f4;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+    h2, h3, h4, h5, h6 {
+    @apply font-normal tracking-tight text-text;
+  }
+    h1{
+    @apply font-semibold text-6xl tracking-tight text-text;
+  }
+
+  p {
+    @apply text-muted leading-relaxed;
+  }
+
+  a {
+    @apply text-text transition-colors hover:text-brand/80;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: black;
+  }
+}
