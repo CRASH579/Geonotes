@@ -68,3 +68,42 @@
     color: black;
   }
 }
+
+/* -------------------------
+   BUBBLE NAV - CSS Variables driven
+   ------------------------- */
+.bubble-nav {
+  --bubble-x: 0px;
+  --bubble-y: 0px;
+  --bubble-w: 0px;
+  --bubble-h: 0px;
+  --hover-x: 0px;
+  --hover-y: 0px;
+  --hover-w: 100%;
+  --hover-h: 100%;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 9999px;
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+}
+
+.bubble--active {
+  left: var(--bubble-x);
+  top: var(--bubble-y);
+  width: var(--bubble-w);
+  height: var(--bubble-h);
+  z-index: 2;
+  background: linear-gradient(to bottom, var(--color-text), var(--color-brand));
+}
+
+.bubble--hover {
+  left: var(--hover-x);
+  top: var(--hover-y);
+  width: var(--hover-w);
+  height: var(--hover-h);
+  z-index: 1;
+  background: linear-gradient(to bottom, var(--color-surface-2), var(--color-surface));
+}
