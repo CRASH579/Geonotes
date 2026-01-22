@@ -80,7 +80,7 @@ export const Navbar = () => {
           </a>
           <nav
             ref={desktopNav}
-            className="bubble-nav absolute left-1/2 -translate-x-1/2 flex py-2 items-center rounded-full border-2 border-surface bg-gradient-to-b from-surface to-surface-2"
+            className="bubble-nav absolute left-1/2 -translate-x-1/2 flex py-2 items-center rounded-full bg-linear-to-b from-surface to-surface-2"
             onMouseLeave={() => initHoverBubble(desktopNav.current)}
           >
             <div className="bubble bubble--active" />
@@ -112,7 +112,7 @@ export const Navbar = () => {
         {menuOpen && (
           <nav
             ref={mobileNav}
-            className="bubble-nav fixed right-5 top-26 sm:hidden flex flex-col items-center px-1 gap-2 rounded-full  bg-gradient-to-b from-surface to-surface-2"
+            className="bubble-nav fixed right-5 top-26 sm:hidden flex flex-col items-center px-2 gap-2 rounded-full  bg-linear-to-b from-surface to-surface-2"
             onMouseLeave={() => initHoverBubble(mobileNav.current)}
           >
             <div className="bubble bubble--active" />
@@ -124,7 +124,7 @@ export const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`mobile-link relative z-10 p-5 rounded-full transition-colors ${
+                  className={`mobile-link relative z-10 p-4 rounded-full transition-colors ${
                     isActive(link.path) ? "active" : ""
                   }`}
                   onMouseEnter={(e) => updateBubble(mobileNav.current, e.currentTarget, "hover")}
