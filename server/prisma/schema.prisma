@@ -1,0 +1,71 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+// ─────────────── Enums ───────────────
+
+enum NoteVisibility {
+  PRIVATE
+  FRIENDS
+  GROUP
+  PUBLIC
+}
+
+// ─────────────── Models ───────────────
+
+model User {
+  id           String   @id @default(uuid())
+  firebase_uid String   @unique
+  email        String   @unique
+  username     String   @unique
+  avatar_url   String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  notes Note[]
+
+  // ── Phase 2 placeholders (uncomment when implementing) ──
+  // friendships_initiated Friendship[] @relation("Initiator")
+  // friendships_received  Friendship[] @relation("Receiver")
+  // memberships           GroupMember[]
+
+  @@map("users")
+}
+
+model Note {
+  id         String                              @id @default(uuid())
+  owner_id   String
+  title      String
+  content    String
+  location   Unsupported("geography(Point,4326)")
+  visibility NoteVisibility                      @default(PRIVATE)
+  created_at DateTime                            @default(now())
+  updated_at DateTime                            @updatedAt
+  deleted_at DateTime? // soft delete
+
+  owner User @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+
+  // ── Phase 2 placeholder ──
+  // group_id String?
+  // group    Group? @relation(fields: [group_id], references: [id])
+
+  @@index([owner_id])
+  @@index([visibility])
+  @@index([deleted_at])
+  // Spatial GIST index is added manually in the migration SQL:
+  // CREATE INDEX notes_location_idx ON notes USING GIST (location);
+  @@map("notes")
+}
+
+// ─────────────── Phase 2 — DO NOT implement yet ───────────────
+// model Friendship { ... }
+// model Group      { ... }
+// model GroupMember{ ... }
+// model GroupNote  { ... }

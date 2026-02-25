@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { NotesController } from './notes.controller';
 import { NotesService } from './notes.service';
-import { FirestoreService } from 'src/database/firestore.service';
+import { NotesController } from './notes.controller';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
+  imports: [PrismaModule, AuthModule],
+  providers: [NotesService],
   controllers: [NotesController],
-  providers: [NotesService,FirestoreService]
 })
 export class NotesModule {}

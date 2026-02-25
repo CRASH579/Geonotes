@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: geonotes
+      POSTGRES_USER: geonotes
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./server
+    environment:
+      DATABASE_URL: postgresql://geonotes:secret@postgres:5432/geonotes
+      PORT: 3000
+      NODE_ENV: development
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    command: ["/bin/sh", "-c", "npm run start:dev"]
+
+volumes:
+  pgdata:

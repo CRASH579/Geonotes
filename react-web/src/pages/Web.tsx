@@ -8,7 +8,7 @@ export const Web = () => {
 
   useEffect(() => {
     const fetchNotes = async () => {
-      const res = await fetch("http://localhost:3000/api/notes");
+      const res = await fetch("http://localhost:3000/api/notes/legacy");
       const data = await res.json();
       setNotes(data);
     };
