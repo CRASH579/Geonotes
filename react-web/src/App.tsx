@@ -4,6 +4,8 @@ import { Home } from "@/pages/Home";
 import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
 import { Web } from "./pages/Web";
+import Login from "./pages/Login";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -12,8 +14,16 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/web" element={<Web />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/web"
+          element={
+            <ProtectedRoute>
+              <Web />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       <footer className="fixed bottom-0 left-0 w-full text-center py-1 text-sm text-muted bg-surface">
         &copy; {new Date().getFullYear()} Geonotes. All rights reserved.
