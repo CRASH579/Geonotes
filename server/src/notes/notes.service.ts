@@ -123,6 +123,47 @@ export class NotesService {
     return notes;
   }
 
+  // All accessible notes with no spatial filter — FRIENDS, GROUP, and PUBLIC notes
+  // from other users. Own notes come via /mine; this covers everything else so that
+  // social/public content is always visible regardless of location availability.
+  async findSocial(userId: string) {
+    const friendIds = await this.friends.getFriendIds(userId);
+    const friendIdList = friendIds.length > 0 ? friendIds : [''];
+
+    return this.prisma.$queryRaw`
+      SELECT
+        n.id,
+        n.owner_id,
+        u.username  AS owner_username,
+        n.group_id,
+        n.title,
+        n.content,
+        n.visibility,
+        n.created_at,
+        n.updated_at,
+        ST_X(n.location::geometry) AS longitude,
+        ST_Y(n.location::geometry) AS latitude
+      FROM notes n
+      JOIN users u ON u.id = n.owner_id
+      WHERE
+        n.deleted_at IS NULL
+        AND (
+          (n.visibility = 'FRIENDS' AND n.owner_id = ANY(${friendIdList}::text[]))
+          OR (
+            n.visibility = 'GROUP'
+            AND EXISTS (
+              SELECT 1 FROM group_members gm
+              WHERE gm.group_id = n.group_id
+                AND gm.user_id = ${userId}
+            )
+          )
+          OR (n.visibility = 'PUBLIC' AND n.owner_id != ${userId})
+        )
+      ORDER BY n.created_at DESC
+      LIMIT 500
+    `;
+  }
+
   async findMyNotes(userId: string) {
     const notes = await this.prisma.$queryRaw`
       SELECT

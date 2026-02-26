@@ -1,4 +1,4 @@
-import { ChevronDown, FileText, Layers, Map as MapIcon, Plus, User2, Users } from "lucide-react";
+import { ChevronDown, FileText, Layers, Map as MapIcon, Plus, SlidersHorizontal, User2, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AdvancedMarker,
@@ -13,6 +13,7 @@ import {
   getMyNotes,
   getNearbyNotes,
   getPendingReceived,
+  getSocialNotes,
   type FriendEntry,
   type PendingRequest,
 } from "../lib/api";
@@ -24,15 +25,17 @@ import { FriendsPanel } from "../components/panels/FriendsPanel";
 import { GroupsPanel } from "../components/panels/GroupsPanel";
 import { NotesPanel, type NoteFilter } from "../components/panels/NotesPanel";
 import { ProfilePanel } from "../components/panels/ProfilePanel";
+import { SettingsPanel, loadSettings, saveSettings, type NoteSettings } from "../components/panels/SettingsPanel";
 import { useAuth } from "../context/AuthContext";
 
 // nav config
 const APP_VIEWS = [
-  { id: "map",     label: "Map",     icon: MapIcon  },
-  { id: "notes",   label: "Notes",   icon: FileText },
-  { id: "profile", label: "Profile", icon: User2    },
-  { id: "friends", label: "Friends", icon: Users    },
-  { id: "groups",  label: "Groups",  icon: Layers  },
+  { id: "map",      label: "Map",      icon: MapIcon           },
+  { id: "notes",    label: "Notes",    icon: FileText          },
+  { id: "profile",  label: "Profile",  icon: User2             },
+  { id: "friends",  label: "Friends",  icon: Users             },
+  { id: "groups",   label: "Groups",   icon: Layers            },
+  { id: "settings", label: "Settings", icon: SlidersHorizontal },
 ] as const;
 
 type AppView = (typeof APP_VIEWS)[number]["id"];
@@ -52,8 +55,11 @@ export const Web = () => {
   const navRef = useRef<HTMLDivElement>(null);
 
   // notes filter (lifted from NotesPanel)
-  const [noteFilter, setNoteFilter]     = useState("");
-  const [sourceFilter, setSourceFilter] = useState<NoteFilter>("all");
+  const [noteFilter, setNoteFilter]       = useState("");
+  const [activeFilters, setActiveFilters] = useState<Set<NoteFilter>>(() => new Set(["all"]));
+
+  // settings (persisted to localStorage)
+  const [settings, setSettings] = useState<NoteSettings>(loadSettings);
 
   // location
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -61,6 +67,7 @@ export const Web = () => {
   // notes
   const [legacyNotes, setLegacyNotes] = useState<LegacyNote[]>([]);
   const [myNotes, setMyNotes]         = useState<BackendNote[]>([]);
+  const [socialNotes, setSocialNotes] = useState<BackendNote[]>([]);
   const [nearbyNotes, setNearbyNotes] = useState<BackendNote[]>([]);
   const [loading, setLoading]         = useState(true);
 
@@ -68,7 +75,6 @@ export const Web = () => {
   const [friends, setFriends]   = useState<FriendEntry[]>([]);
   const [pending, setPending]   = useState<PendingRequest[]>([]);
   const [groups, setGroups]     = useState<Group[]>([]);
-  const [showLegacy, setShowLegacy] = useState(false);
 
   const friendIds = useMemo(() => new Set(friends.map((f) => f.friend.id)), [friends]);
 
@@ -128,12 +134,19 @@ export const Web = () => {
     } catch { /* non-fatal */ }
   }, []);
 
+  const fetchSocialNotes = useCallback(async () => {
+    try {
+      setSocialNotes((await getSocialNotes()) as BackendNote[]);
+    } catch { /* non-fatal */ }
+  }, []);
+
   useEffect(() => {
     void fetchLegacyNotes();
     void fetchMyNotes();
+    void fetchSocialNotes();
     void fetchFriends();
     void fetchGroups();
-  }, [fetchLegacyNotes, fetchMyNotes, fetchFriends, fetchGroups]);
+  }, [fetchLegacyNotes, fetchMyNotes, fetchSocialNotes, fetchFriends, fetchGroups]);
 
   // supplement with nearby notes — refresh on location change or when switching back to map
   const fetchNearbyNotes = useCallback(async () => {
@@ -147,42 +160,85 @@ export const Web = () => {
   useEffect(() => { void fetchNearbyNotes(); }, [fetchNearbyNotes]);
 
   useEffect(() => {
-    if (activeView === "map") void fetchNearbyNotes();
-  }, [activeView, fetchNearbyNotes]);
+    if (activeView === "map") {
+      void fetchSocialNotes();
+      void fetchNearbyNotes();
+    }
+  }, [activeView, fetchSocialNotes, fetchNearbyNotes]);
+
+  // poll for new social notes and friend requests every 30 s
+  useEffect(() => {
+    const id = setInterval(() => {
+      void fetchSocialNotes();
+      void fetchFriends();
+    }, 30_000);
+    return () => clearInterval(id);
+  }, [fetchSocialNotes, fetchFriends]);
 
   // derived: merge + deduplicate + tag source
+  // Order: mine → social (FRIENDS/GROUP/PUBLIC, no location needed) → nearby (anything in radius, deduped)
   const allBackendNotes = useMemo(() => {
-    const myIds        = new Set(myNotes.map((n) => n.id));
-    const memberGroups = new Set(groups.map((g) => g.id));
-    const deduped      = nearbyNotes.filter((n) => !myIds.has(n.id));
+    const myIds     = new Set(myNotes.map((n) => n.id));
+    const socialIds = new Set(socialNotes.map((n) => n.id));
 
-    const tag = (n: BackendNote): BackendNote => {
+    const dedupedSocial = socialNotes.filter((n) => !myIds.has(n.id));
+    const dedupedNearby = nearbyNotes.filter((n) => !myIds.has(n.id) && !socialIds.has(n.id));
+
+    // /social returns FRIENDS, GROUP, and PUBLIC (from other users) — tag by visibility
+    const tagSocial = (n: BackendNote): BackendNote => {
+      if (n.visibility === "GROUP")   return { ...n, _source: "group" };
+      if (n.visibility === "FRIENDS") return { ...n, _source: "friend" };
+      return { ...n, _source: "public" };
+    };
+
+    // /nearby supplements with spatially-nearby notes — tag by ownership/relationship
+    const tagNearby = (n: BackendNote): BackendNote => {
       if (n.owner_id === user?.id) return { ...n, _source: "mine" };
-      if (n.visibility === "GROUP" && n.group_id && memberGroups.has(n.group_id))
-        return { ...n, _source: "group" };
+      if (n.visibility === "GROUP") return { ...n, _source: "group" };
       if (friendIds.has(n.owner_id)) return { ...n, _source: "friend" };
       return { ...n, _source: "public" };
     };
 
     return [
       ...myNotes.map((n) => ({ ...n, _source: "mine" as const })),
-      ...deduped.map(tag),
+      ...dedupedSocial.map(tagSocial),
+      ...dedupedNearby.map(tagNearby),
     ];
-  }, [myNotes, nearbyNotes, user?.id, friendIds, groups]);
+  }, [myNotes, socialNotes, nearbyNotes, user?.id, friendIds]);
 
-  // filtered notes for map pins — respects sourceFilter (legacy filter hides all backend pins)
+  // filtered notes for map pins — multi-select activeFilters
   const filteredMapNotes = useMemo(() => {
-    if (sourceFilter === "legacy") return [];
-    if (sourceFilter === "all") return allBackendNotes;
-    return allBackendNotes.filter((n) => n._source === sourceFilter);
-  }, [allBackendNotes, sourceFilter]);
+    if (activeFilters.has("all")) return allBackendNotes;
+    return allBackendNotes.filter((n) => {
+      if (activeFilters.has("private") && n._source === "mine" && n.visibility === "PRIVATE") return true;
+      if (activeFilters.has("mine")    && n._source === "mine") return true;
+      if (activeFilters.has("friend")  && n._source === "friend") return true;
+      if (activeFilters.has("group")   && n._source === "group") return true;
+      if (activeFilters.has("public")  && n._source === "public") return true;
+      return false;
+    });
+  }, [allBackendNotes, activeFilters]);
 
-  // filtered legacy pins — hidden when legacy is disabled or a non-legacy source filter is active
+  // legacy pins  gated by settings toggle only (not by filter chips)
   const filteredLegacyPins = useMemo(() => {
-    if (!showLegacy) return [];
-    if (sourceFilter === "all" || sourceFilter === "legacy") return legacyNotes;
-    return [];
-  }, [legacyNotes, sourceFilter, showLegacy]);
+    if (!settings.showLegacy) return [];
+    return legacyNotes;
+  }, [legacyNotes, settings.showLegacy]);
+
+  const toggleFilter = useCallback((f: NoteFilter) => {
+    setActiveFilters((prev) => {
+      if (f === "all") return new Set(["all"]);
+      const next = new Set(prev);
+      next.delete("all");
+      if (next.has(f)) {
+        next.delete(f);
+        if (next.size === 0) return new Set(["all"]);
+      } else {
+        next.add(f);
+      }
+      return next;
+    });
+  }, []);
 
   // map click: if not in map view, switch to map; otherwise open create modal
   const handleMapClick = useCallback((e: MapMouseEvent) => {
@@ -220,13 +276,15 @@ export const Web = () => {
 
   const handleNoteCreated = useCallback(() => {
     void fetchMyNotes();
+    void fetchSocialNotes();
     void fetchNearbyNotes();
-  }, [fetchMyNotes, fetchNearbyNotes]);
+  }, [fetchMyNotes, fetchSocialNotes, fetchNearbyNotes]);
 
   const handleNoteDeleted = useCallback(() => {
     void fetchMyNotes();
+    void fetchSocialNotes();
     void fetchNearbyNotes();
-  }, [fetchMyNotes, fetchNearbyNotes]);
+  }, [fetchMyNotes, fetchSocialNotes, fetchNearbyNotes]);
 
   const activeNavItem = APP_VIEWS.find((v) => v.id === activeView)!;
   const ActiveIcon = activeNavItem.icon;
@@ -353,12 +411,12 @@ export const Web = () => {
         <NotesPanel
           loading={loading}
           backendNotes={allBackendNotes}
-          legacyNotes={showLegacy ? legacyNotes : []}
+          legacyNotes={settings.showLegacy ? legacyNotes : []}
           groupNames={groupNames}
           noteFilter={noteFilter}
           onFilterChange={setNoteFilter}
-          sourceFilter={sourceFilter}
-          onSourceFilterChange={setSourceFilter}
+          activeFilters={activeFilters}
+          onToggleFilter={toggleFilter}
           onNewNote={() => openNewNote()}
           onSelectNote={setSelectedNote}
         />
@@ -369,8 +427,6 @@ export const Web = () => {
           myNotes={myNotes}
           friendsCount={friends.length}
           groupsCount={groups.length}
-          showLegacy={showLegacy}
-          onToggleLegacy={setShowLegacy}
         />
       )}
       {activeView === "friends" && (
@@ -378,6 +434,13 @@ export const Web = () => {
       )}
       {activeView === "groups" && (
         <GroupsPanel groups={groups} onRefresh={fetchGroups} />
+      )}
+      {activeView === "settings" && (
+        <SettingsPanel
+          settings={settings}
+          userRole={user?.role ?? "USER"}
+          onChange={(s) => { setSettings(s); saveSettings(s); }}
+        />
       )}
 
       {/* note detail drawer */}

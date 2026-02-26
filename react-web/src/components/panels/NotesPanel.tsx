@@ -3,16 +3,16 @@ import { Globe, Lock, Plus, Users } from "lucide-react";
 import type { BackendNote, LegacyNote, NoteSource } from "../../types";
 import type { DetailSubject } from "../NoteDetailDrawer";
 
-// ─── types ───────────────────────────────────────────────────────────────────
-export type NoteFilter = "all" | NoteSource | "legacy";
+// types 
+export type NoteFilter = "all" | "private" | NoteSource;
 
 const FILTER_TABS: { id: NoteFilter; label: string }[] = [
-  { id: "all",    label: "All" },
-  { id: "mine",   label: "Mine" },
-  { id: "friend", label: "Friends" },
-  { id: "group",  label: "Groups" },
-  { id: "public", label: "Public" },
-  { id: "legacy", label: "Legacy" },
+  { id: "all",     label: "All" },
+  { id: "private", label: "Private" },
+  { id: "mine",    label: "Mine" },
+  { id: "friend",  label: "Friends" },
+  { id: "group",   label: "Groups" },
+  { id: "public",  label: "Public" },
 ];
 
 const VIS_ICON: Record<string, ReactElement> = {
@@ -29,21 +29,32 @@ const SOURCE_DOT: Record<NoteSource, string> = {
   public: "bg-[#f38ba8]",
 };
 
-// ─── props ───────────────────────────────────────────────────────────────────
+// props
 interface Props {
   loading: boolean;
   backendNotes: BackendNote[];
   legacyNotes: LegacyNote[];
-  groupNames: Record<string, string>; // group_id → group name
+  groupNames: Record<string, string>;
   noteFilter: string;
   onFilterChange: (v: string) => void;
-  sourceFilter: NoteFilter;
-  onSourceFilterChange: (f: NoteFilter) => void;
+  activeFilters: Set<NoteFilter>;
+  onToggleFilter: (f: NoteFilter) => void;
   onNewNote: () => void;
   onSelectNote: (subject: DetailSubject) => void;
 }
 
-// ─── component ───────────────────────────────────────────────────────────────
+// helper: does a note match the active filter set?
+function noteMatchesFilters(n: BackendNote, activeFilters: Set<NoteFilter>): boolean {
+  if (activeFilters.has("all")) return true;
+  if (activeFilters.has("private") && n._source === "mine" && n.visibility === "PRIVATE") return true;
+  if (activeFilters.has("mine")    && n._source === "mine") return true;
+  if (activeFilters.has("friend")  && n._source === "friend") return true;
+  if (activeFilters.has("group")   && n._source === "group") return true;
+  if (activeFilters.has("public")  && n._source === "public") return true;
+  return false;
+}
+
+// component 
 export function NotesPanel({
   loading,
   backendNotes,
@@ -51,23 +62,19 @@ export function NotesPanel({
   groupNames,
   noteFilter,
   onFilterChange,
-  sourceFilter,
-  onSourceFilterChange,
+  activeFilters,
+  onToggleFilter,
   onNewNote,
   onSelectNote,
 }: Props) {
   const q = noteFilter.toLowerCase();
 
   const visibleBackend = backendNotes.filter((n) => {
-    if (sourceFilter === "legacy") return false;
-    if (sourceFilter !== "all" && n._source !== sourceFilter) return false;
+    if (!noteMatchesFilters(n, activeFilters)) return false;
     return n.title?.toLowerCase().includes(q) || n.content?.toLowerCase().includes(q);
   });
 
-  const visibleLegacy =
-    sourceFilter === "all" || sourceFilter === "legacy"
-      ? legacyNotes.filter((n) => n.text?.toLowerCase().includes(q))
-      : [];
+  const visibleLegacy = legacyNotes.filter((n) => n.text?.toLowerCase().includes(q));
 
   const isEmpty = !loading && visibleBackend.length === 0 && visibleLegacy.length === 0;
 
@@ -83,21 +90,24 @@ export function NotesPanel({
           value={noteFilter}
           onChange={(e) => onFilterChange(e.target.value)}
         />
-        {/* source filter chips */}
+        {/* source filter chips — multi-select */}
         <div className="flex gap-1.5 mt-3 flex-wrap">
-          {FILTER_TABS.map(({ id, label }) => (
-            <button
-              key={id}
-              onClick={() => onSourceFilterChange(id)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                sourceFilter === id
-                  ? "bg-brand text-light"
-                  : "bg-surface-2 text-muted hover:text-text"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+          {FILTER_TABS.map(({ id, label }) => {
+            const active = activeFilters.has(id);
+            return (
+              <button
+                key={id}
+                onClick={() => onToggleFilter(id)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  active
+                    ? "bg-brand text-light"
+                    : "bg-surface-2 text-muted hover:text-text"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

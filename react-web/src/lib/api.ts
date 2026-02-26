@@ -100,6 +100,12 @@ export async function getLegacyNotes() {
   return res.json();
 }
 
+export async function getSocialNotes() {
+  const res = await authFetch(`${API}/api/notes/social`);
+  if (!res.ok) throw new Error("Failed to fetch social notes");
+  return res.json();
+}
+
 // friends
 
 export type FriendEntry = {

@@ -36,6 +36,13 @@ export class NotesController {
     return this.notesService.findMyNotes(req.user.id);
   }
 
+  @Get('social')
+  @ApiOperation({ summary: 'Get all FRIENDS + GROUP notes visible to the authenticated user (no spatial filter)' })
+  @ApiResponse({ status: 200, type: [NoteResponseDto] })
+  findSocial(@Req() req) {
+    return this.notesService.findSocial(req.user.id);
+  }
+
   @Get('legacy')
   @ApiOperation({ summary: 'Fetch legacy notes directly from Firestore (read-only)' })
   getLegacyNotes() {

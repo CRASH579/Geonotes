@@ -35,16 +35,22 @@ enum GroupVisibility {
   FRIENDS_ONLY
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 // ─────────────── Models ───────────────
 
 model User {
-  id           String   @id @default(uuid())
-  firebase_uid String   @unique
-  email        String   @unique
-  username     String   @unique
+  id           String    @id @default(uuid())
+  firebase_uid String    @unique
+  email        String    @unique
+  username     String    @unique
   avatar_url   String?
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  role         UserRole  @default(USER)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
 
   notes                 Note[]
   friendships_initiated Friendship[]  @relation("Initiator")

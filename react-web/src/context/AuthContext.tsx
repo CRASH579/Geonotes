@@ -3,11 +3,13 @@ import type { ReactNode } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { backendLogin } from "@/lib/api";
+import type { UserRole } from "@/types";
 
 type AppUser = {
   id: string;
   email: string;
   username: string;
+  role: UserRole;
 };
 
 type AuthContextType = {

@@ -23,6 +23,7 @@ export type BackendNote = {
 
 export type GroupMemberRole = 'OWNER' | 'ADMIN' | 'MEMBER';
 export type GroupVisibility = 'PUBLIC' | 'FRIENDS_ONLY';
+export type UserRole = 'USER' | 'ADMIN';
 
 export type GroupMember = {
   id: string;
