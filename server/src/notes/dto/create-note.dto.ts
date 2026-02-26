@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsEnum, IsOptional, IsUUID } from 'class-validator';
 import { NoteVisibility } from '@prisma/client';
 
 export class CreateNoteDto {
@@ -25,4 +25,9 @@ export class CreateNoteDto {
   @IsEnum(NoteVisibility)
   @IsOptional()
   visibility?: NoteVisibility;
+
+  @ApiPropertyOptional({ description: 'Group ID — required when visibility is GROUP' })
+  @IsUUID()
+  @IsOptional()
+  group_id?: string;
 }

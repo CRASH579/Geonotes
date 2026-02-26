@@ -1,4 +1,5 @@
 import { authFetch } from "./authFetch";
+import type { Group, GroupMember, GroupVisibility } from "../types";
 
 const API = import.meta.env.VITE_API_URL as string;
 
@@ -46,6 +47,7 @@ export type CreateNoteInput = {
   latitude: number;
   longitude: number;
   visibility?: NoteVisibility;
+  group_id?: string;
 };
 
 export async function createNote(data: CreateNoteInput) {
@@ -71,6 +73,24 @@ export async function getNearbyNotes(lat: number, lng: number, radius = 1000) {
   });
   const res = await authFetch(`${API}/api/notes/nearby?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to fetch nearby notes");
+  return res.json();
+}
+
+export async function updateNote(
+  id: string,
+  data: { title?: string; content?: string; visibility?: NoteVisibility },
+) {
+  const res = await authFetch(`${API}/api/notes/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update note");
+  return res.json();
+}
+
+export async function deleteNote(id: string) {
+  const res = await authFetch(`${API}/api/notes/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete note");
   return res.json();
 }
 
@@ -130,5 +150,54 @@ export async function getPendingReceived(): Promise<PendingRequest[]> {
 export async function removeFriend(friendshipId: string) {
   const res = await authFetch(`${API}/api/friends/${friendshipId}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to remove friend");
+  return res.json();
+}
+
+// ─── groups ──────────────────────────────────────────────────────────────────
+
+export async function createGroup(name: string, visibility: GroupVisibility = 'PUBLIC'): Promise<Group> {
+  const res = await authFetch(`${API}/api/groups`, {
+    method: "POST",
+    body: JSON.stringify({ name, visibility }),
+  });
+  if (!res.ok) throw new Error("Failed to create group");
+  return res.json() as Promise<Group>;
+}
+
+export async function getMyGroups(): Promise<Group[]> {
+  const res = await authFetch(`${API}/api/groups`);
+  if (!res.ok) throw new Error("Failed to fetch groups");
+  return res.json() as Promise<Group[]>;
+}
+
+export async function getGroup(id: string): Promise<Group> {
+  const res = await authFetch(`${API}/api/groups/${id}`);
+  if (!res.ok) throw new Error("Failed to fetch group");
+  return res.json() as Promise<Group>;
+}
+
+export async function addGroupMember(groupId: string, username: string): Promise<GroupMember> {
+  const res = await authFetch(`${API}/api/groups/${groupId}/members`, {
+    method: "POST",
+    body: JSON.stringify({ username }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { message?: string };
+    throw new Error(err.message ?? "Failed to add member");
+  }
+  return res.json() as Promise<GroupMember>;
+}
+
+export async function removeGroupMember(groupId: string, userId: string) {
+  const res = await authFetch(`${API}/api/groups/${groupId}/members/${userId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to remove member");
+  return res.json();
+}
+
+export async function deleteGroup(groupId: string) {
+  const res = await authFetch(`${API}/api/groups/${groupId}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete group");
   return res.json();
 }

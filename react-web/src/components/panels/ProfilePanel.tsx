@@ -7,9 +7,13 @@ import type { BackendNote, LegacyNote } from "../../types";
 interface Props {
   legacyNotes: LegacyNote[];
   myNotes: BackendNote[];
+  friendsCount: number;
+  groupsCount: number;
+  showLegacy: boolean;
+  onToggleLegacy: (v: boolean) => void;
 }
 
-export function ProfilePanel({ legacyNotes, myNotes }: Props) {
+export function ProfilePanel({ legacyNotes, myNotes, friendsCount, groupsCount, showLegacy, onToggleLegacy }: Props) {
   const { user, firebaseUser } = useAuth();
 
   const handleSignOut = async () => {
@@ -34,12 +38,31 @@ export function ProfilePanel({ legacyNotes, myNotes }: Props) {
 
       <div className="mt-6 space-y-2">
         <div className="flex justify-between items-center bg-surface-2 rounded-2xl px-4 py-3">
-          <span className="text-muted text-sm">Legacy notes</span>
-          <span className="text-text font-semibold">{legacyNotes.length}</span>
-        </div>
-        <div className="flex justify-between items-center bg-surface-2 rounded-2xl px-4 py-3">
           <span className="text-muted text-sm">Your notes</span>
           <span className="text-text font-semibold">{myNotes.length}</span>
+        </div>
+        <div className="flex justify-between items-center bg-surface-2 rounded-2xl px-4 py-3">
+          <span className="text-muted text-sm">Friends</span>
+          <span className="text-text font-semibold">{friendsCount}</span>
+        </div>
+        <div className="flex justify-between items-center bg-surface-2 rounded-2xl px-4 py-3">
+          <span className="text-muted text-sm">Groups</span>
+          <span className="text-text font-semibold">{groupsCount}</span>
+        </div>
+        <div className="flex justify-between items-center bg-surface-2 rounded-2xl px-4 py-3">
+          <span className="text-muted text-sm">Legacy notes</span>
+          <div className="flex items-center gap-3">
+            <span className="text-text font-semibold">{legacyNotes.length}</span>
+            <button
+              role="switch"
+              aria-checked={showLegacy}
+              onClick={() => onToggleLegacy(!showLegacy)}
+              className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${showLegacy ? "bg-brand" : "bg-border/40"}`}
+              title={showLegacy ? "Hide legacy notes" : "Show legacy notes"}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${showLegacy ? "translate-x-4" : "translate-x-0"}`} />
+            </button>
+          </div>
         </div>
       </div>
 

@@ -16,7 +16,7 @@ const EXPERIENCE = [
     role: "Full Stack Developer",
     company: "Fastcurve Services",
     location: "Noida, UP",
-    period: "Aug 2025 – Present",
+    period: "Aug 2025 – Jan 2026",
     points: [
       "Engineered and scaled a multi-tenant freight management system using Vue.js and NestJS, enabling secure, isolated client environments in a single application.",
       "Delivered production-ready features and modules end-to-end, accelerating time-to-market while ensuring performance and maintainability.",
@@ -59,7 +59,7 @@ const EDUCATION = [
     degree: "Intermediate (CBSE)",
     institution: "K.L. International School",
     location: "Meerut, India",
-    period: "2018",
+    period: "2019",
     tags: ["90.3%"],
   },
 ];

@@ -13,7 +13,7 @@ export class NearbyQueryDto {
   @IsNumber()
   longitude: number;
 
-  @ApiPropertyOptional({ description: 'Radius in meters. Default 1000m.', default: 1000 })
+  @ApiPropertyOptional({ description: 'Radius in meters. Default 500,000m (500km).', default: 500000 })
   @Type(() => Number)
   @IsNumber()
   @IsOptional()
