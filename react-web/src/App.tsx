@@ -5,6 +5,7 @@ import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
 import { Web } from "./pages/Web";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route
           path="/web"
           element={

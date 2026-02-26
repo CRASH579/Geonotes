@@ -14,7 +14,7 @@ import {
 
 const NAV_LINKS = [
   { path: "/", label: "Home", icon: House },
-  { path: "/web", label: "Web", icon: MapPinPen },
+  { path: "/web", label: "App", icon: MapPinPen },
   { path: "/about", label: "About", icon: Contact },
   { path: "/projects", label: "Projects", icon: ChevronsLeftRightEllipsis },
 ];
