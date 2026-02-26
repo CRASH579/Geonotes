@@ -73,14 +73,9 @@ export const Navbar = () => {
 
   return (
     <header className="fixed top-0 left-0 z-50 w-full">
-      <div className="mx-auto max-w-7xl">
-        <div className="hidden sm:flex mx-10 my-4 items-center justify-between py-4 px-3 bg-surface rounded-full">
-          <a href="https://geonotes.in" target="_blank" rel="noopener noreferrer">
-            <img src={Logo} className="h-10" alt="Geonotes logo" />
-          </a>
           <nav
             ref={desktopNav}
-            className="bubble-nav absolute left-1/2 -translate-x-1/2 flex py-2 items-center rounded-full bg-linear-to-b from-surface to-surface-2"
+            className="hidden sm:flex bubble-nav absolute left-1/2 -translate-x-1/2 mt-5 py-2 items-center rounded-full bg-linear-to-b from-surface to-surface-2"
             onMouseLeave={() => initHoverBubble(desktopNav.current)}
           >
             <div className="bubble bubble--active" />
@@ -99,11 +94,10 @@ export const Navbar = () => {
               </Link>
             ))}
           </nav>
-        </div>
 
         <button
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="bg-surface fixed top-4 right-5 sm:hidden p-6 rounded-full z-50"
+          className="bg-surface fixed mt-5 ml-5 top-0 left-0 sm:hidden p-6 rounded-full z-50"
           aria-label="Toggle menu"
         >
           {menuOpen ? <SquareEqual /> : <SquareChevronDown />}
@@ -112,7 +106,7 @@ export const Navbar = () => {
         {menuOpen && (
           <nav
             ref={mobileNav}
-            className="bubble-nav fixed right-5 top-26 sm:hidden flex flex-col items-center px-2 gap-2 rounded-full  bg-linear-to-b from-surface to-surface-2"
+            className="bubble-nav fixed left-5 top-26 sm:hidden flex flex-col items-center px-2 gap-2 rounded-full  bg-linear-to-b from-surface to-surface-2"
             onMouseLeave={() => initHoverBubble(mobileNav.current)}
           >
             <div className="bubble bubble--active" />
@@ -143,7 +137,6 @@ export const Navbar = () => {
             </button>
           </nav>
         )}
-      </div>
     </header>
   );
 };

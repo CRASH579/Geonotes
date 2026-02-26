@@ -33,8 +33,8 @@ export const Home = () => {
     <main className="w-full max-w-5xl mx-auto px-6 pb-24">
       {/* Hero */}
       <section className="flex flex-col items-center text-center gap-6 pt-36 pb-20">
-        <div className="flex items-center gap-4">
-          <img src={Logo} className="h-20" alt="Geonotes logo" />
+        <div className="flex items-center gap-2">
+          <img src={Logo} className="h-15" alt="Geonotes logo" />
           <h1>Geonotes</h1>
         </div>
         <p className="max-w-xl text-lg">

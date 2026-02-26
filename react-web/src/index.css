@@ -48,7 +48,7 @@
     @apply font-normal tracking-tight text-text;
   }
   h1 {
-    @apply font-semibold text-6xl tracking-tight text-text;
+    @apply font-semibold text-5xl tracking-tight text-text;
   }
   h2 {
     @apply font-semibold text-4xl tracking-tight text-text;

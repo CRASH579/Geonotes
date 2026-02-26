@@ -9,7 +9,7 @@ import { NoteResponseDto } from './dto/note-response.dto';
 
 @ApiTags('notes')
 @ApiBearerAuth('firebase-jwt')
-//@UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
@@ -18,6 +18,7 @@ export class NotesController {
   @ApiOperation({ summary: 'Create a new note at current location' })
   @ApiResponse({ status: 201, type: NoteResponseDto })
   create(@Req() req, @Body() createNoteDto: CreateNoteDto) {
+    if (!req.user?.id) throw new Error('User not attached by guard - check AuthGuard is applied');
     return this.notesService.create(req.user.id, createNoteDto);
   }
 
