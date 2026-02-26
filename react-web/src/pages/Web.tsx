@@ -22,7 +22,7 @@ import { FriendsPanel } from "../components/panels/FriendsPanel";
 import { NotesPanel } from "../components/panels/NotesPanel";
 import { ProfilePanel } from "../components/panels/ProfilePanel";
 
-// ─── nav config ─────────────────────────────────────────────────────────────
+// nav config 
 const APP_VIEWS = [
   { id: "map",     label: "Map",     icon: MapIcon  },
   { id: "notes",   label: "Notes",   icon: FileText },
@@ -32,9 +32,8 @@ const APP_VIEWS = [
 
 type AppView = (typeof APP_VIEWS)[number]["id"];
 
-// ─── component ───────────────────────────────────────────────────────────────
 export const Web = () => {
-  // view / ui
+  // view 
   const [activeView, setActiveView]         = useState<AppView>("map");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showModal, setShowModal]           = useState(false);
@@ -54,7 +53,7 @@ export const Web = () => {
   const [friends, setFriends] = useState<FriendEntry[]>([]);
   const [pending, setPending] = useState<PendingRequest[]>([]);
 
-  // ── geolocation ────────────────────────────────────────────────────────────
+  // geolocation 
   useEffect(() => {
     // enableHighAccuracy:false avoids the Google network location provider
     // which adblockers block — IP/WiFi location still works fine
@@ -65,7 +64,7 @@ export const Web = () => {
     );
   }, []);
 
-  // ── fetchers ───────────────────────────────────────────────────────────────
+  // fetchers
   const fetchLegacyNotes = useCallback(async () => {
     setLoading(true);
     try {
@@ -106,7 +105,6 @@ export const Web = () => {
       .catch(() => {});
   }, [userLocation]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── derived state ─────────────────────────────────────────────────────────
   const allBackendNotes = useMemo(
     () => [...myNotes, ...nearbyNotes],
     [myNotes, nearbyNotes],
@@ -124,7 +122,6 @@ export const Web = () => {
     [legacyNotes, q],
   );
 
-  // ── handlers ──────────────────────────────────────────────────────────────
   const handleMapClick = useCallback((e: MapMouseEvent) => {
     const ll = e.detail.latLng;
     if (!ll) return;
@@ -150,11 +147,9 @@ export const Web = () => {
     void fetchMyNotes();
   }, [fetchLegacyNotes, fetchMyNotes]);
 
-  // ── nav ───────────────────────────────────────────────────────────────────
   const activeNavItem = APP_VIEWS.find((v) => v.id === activeView)!;
   const ActiveIcon = activeNavItem.icon;
 
-  // ── render ────────────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 bg-bg overflow-hidden">
 
