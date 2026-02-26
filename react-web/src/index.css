@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
-/* -------------------------
-   THEME TOKENS (Tailwind v4)
-   ------------------------- */
+/*THEME TOKENS*/
 @theme {
   /* Override default sans font */
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
@@ -69,9 +67,7 @@
   }
 }
 
-/* -------------------------
-   BUBBLE NAV - CSS Variables driven
-   ------------------------- */
+/* Nav*/
 .bubble-nav {
   --bubble-x: 0px;
   --bubble-y: 0px;

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { FirebaseService } from '../firebase/firebase.service';
+import { FriendsService } from '../friends/friends.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { NearbyQueryDto } from './dto/nearby-query.dto';
@@ -9,7 +10,8 @@ import { NearbyQueryDto } from './dto/nearby-query.dto';
 export class NotesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly firebase: FirebaseService
+    private readonly firebase: FirebaseService,
+    private readonly friends: FriendsService,
   ) {}
 
   async create(userId: string, createNoteDto: CreateNoteDto) {
@@ -48,15 +50,11 @@ export class NotesService {
 
   async findNearby(userId: string, query: NearbyQueryDto) {
     const { latitude, longitude, radiusMeters = 1000 } = query;
-    
-    // The query finds notes that:
-    // 1. Are not soft-deleted
-    // 2. Belong to the user OR are PUBLIC (FRIENDS/GROUP logic later)
-    // 3. Are within the specified radius
-    // Results are ordered by distance.
-    
+    const friendIds = await this.friends.getFriendIds(userId);
+    const friendIdList = friendIds.length > 0 ? friendIds : [''];
+
     const notes = await this.prisma.$queryRaw`
-      SELECT 
+      SELECT
         id, owner_id, title, content, visibility, created_at, updated_at,
         ST_X(location::geometry) as longitude, ST_Y(location::geometry) as latitude,
         ST_Distance(
@@ -64,9 +62,13 @@ export class NotesService {
           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
         ) as distance_meters
       FROM notes
-      WHERE 
+      WHERE
         deleted_at IS NULL
-        AND (owner_id = ${userId} OR visibility = 'PUBLIC')
+        AND (
+          owner_id = ${userId}
+          OR visibility = 'PUBLIC'
+          OR (visibility = 'FRIENDS' AND owner_id = ANY(${friendIdList}::text[]))
+        )
         AND ST_DWithin(
           location::geography,
           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
@@ -75,7 +77,20 @@ export class NotesService {
       ORDER BY distance_meters ASC
       LIMIT 100
     `;
-    
+    return notes;
+  }
+
+  async findMyNotes(userId: string) {
+    const notes = await this.prisma.$queryRaw`
+      SELECT
+        id, owner_id, title, content, visibility, created_at, updated_at,
+        ST_X(location::geometry) as longitude,
+        ST_Y(location::geometry) as latitude
+      FROM notes
+      WHERE deleted_at IS NULL AND owner_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 200
+    `;
     return notes;
   }
 

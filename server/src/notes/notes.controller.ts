@@ -29,6 +29,13 @@ export class NotesController {
     return this.notesService.findNearby(req.user.id, query);
   }
 
+  @Get('mine')
+  @ApiOperation({ summary: 'Get all notes belonging to the authenticated user' })
+  @ApiResponse({ status: 200, type: [NoteResponseDto] })
+  findMyNotes(@Req() req) {
+    return this.notesService.findMyNotes(req.user.id);
+  }
+
   @Get('legacy')
   @ApiOperation({ summary: 'Fetch legacy notes directly from Firestore (read-only)' })
   getLegacyNotes() {

@@ -7,6 +7,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { NotesModule } from './notes/notes.module';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotesModule } from './notes/notes.module';
     AuthModule,
     UsersModule,
     NotesModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

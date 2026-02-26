@@ -18,6 +18,12 @@ enum NoteVisibility {
   PUBLIC
 }
 
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 // ─────────────── Models ───────────────
 
 model User {
@@ -30,11 +36,8 @@ model User {
   updated_at   DateTime @updatedAt
 
   notes Note[]
-
-  // ── Phase 2 placeholders (uncomment when implementing) ──
-  // friendships_initiated Friendship[] @relation("Initiator")
-  // friendships_received  Friendship[] @relation("Receiver")
-  // memberships           GroupMember[]
+  friendships_initiated Friendship[] @relation("Initiator")
+  friendships_received  Friendship[] @relation("Receiver")
 
   @@map("users")
 }
@@ -64,8 +67,21 @@ model Note {
   @@map("notes")
 }
 
-// ─────────────── Phase 2 — DO NOT implement yet ───────────────
-// model Friendship { ... }
-// model Group      { ... }
-// model GroupMember{ ... }
-// model GroupNote  { ... }
+// friendship between two users
+model Friendship {
+  id           String           @id @default(uuid())
+  initiator_id String
+  receiver_id  String
+  status       FriendshipStatus @default(PENDING)
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+
+  initiator User @relation("Initiator", fields: [initiator_id], references: [id], onDelete: Cascade)
+  receiver  User @relation("Receiver", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@unique([initiator_id, receiver_id])
+  @@index([receiver_id])
+  @@index([status])
+  @@map("friendships")
+}
+

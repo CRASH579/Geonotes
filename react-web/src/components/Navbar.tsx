@@ -1,4 +1,3 @@
-import Logo from "@/assets/logo.svg";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {

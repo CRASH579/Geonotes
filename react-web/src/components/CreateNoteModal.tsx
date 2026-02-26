@@ -29,10 +29,15 @@ export function CreateNoteModal({ onClose, onCreated, initialCoords }: Props) {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setGeoLoading(false);
       },
-      () => {
-        setGeoError(
-          "Location access denied. Allow it in browser settings or tap the map to pin manually."
-        );
+      (err) => {
+        // code 1 = permission denied, code 2 = position unavailable (e.g. adblocker blocks network provider), code 3 = timeout
+        const msg =
+          err.code === 1
+            ? "Location blocked. Enable it in browser settings (site permissions → location)."
+            : err.code === 2
+              ? "Location unavailable — your adblocker may be blocking the location provider. Whitelist this site or tap the map to pin instead."
+              : "Location timed out. Tap the map to pin your note instead.";
+        setGeoError(msg);
         setGeoLoading(false);
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
@@ -86,15 +91,11 @@ export function CreateNoteModal({ onClose, onCreated, initialCoords }: Props) {
           </button>
         </div>
 
-        {/* Location status */}
-        {initialCoords ? (
-          <div className="mb-4 px-4 py-2 rounded-xl bg-surface-2 text-xs text-brand flex items-center gap-2">
-            <LocateFixed size={13} />
-            Pinned from map: {coords!.lat.toFixed(5)}, {coords!.lng.toFixed(5)}
-          </div>
-        ) : geoLoading ? (
-          <div className="mb-4 px-4 py-2 rounded-xl bg-surface-2 text-sm text-muted">
-            Getting your location…
+        {/* location status */}
+        {geoLoading ? (
+          <div className="mb-4 px-4 py-2 rounded-xl bg-surface-2 text-xs text-muted flex items-center gap-2">
+            <LocateFixed size={13} className="animate-pulse" />
+            getting your location…
           </div>
         ) : geoError ? (
           <div className="mb-4 px-4 py-2 rounded-xl bg-surface-2 text-sm text-muted flex items-center justify-between gap-3">
@@ -103,13 +104,13 @@ export function CreateNoteModal({ onClose, onCreated, initialCoords }: Props) {
               onClick={requestLocation}
               className="shrink-0 text-xs text-brand underline hover:opacity-80"
             >
-              Retry
+              retry
             </button>
           </div>
         ) : coords ? (
-          <div className="mb-4 px-4 py-2 rounded-xl bg-surface-2 text-xs text-muted flex items-center gap-2">
-            <LocateFixed size={13} className="text-brand" />
-            {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+          <div className="mb-4 px-4 py-2 rounded-xl bg-surface-2 text-xs text-brand flex items-center gap-2">
+            <LocateFixed size={13} />
+            {initialCoords ? "pinned from map" : "got your location"} · {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
           </div>
         ) : null}
 
@@ -134,7 +135,7 @@ export function CreateNoteModal({ onClose, onCreated, initialCoords }: Props) {
         />
 
         <div className="flex gap-2 mb-6">
-          {(["PRIVATE", "PUBLIC"] as NoteVisibility[]).map((v) => (
+          {(["PRIVATE", "FRIENDS", "PUBLIC"] as NoteVisibility[]).map((v) => (
             <button
               key={v}
               onClick={() => setVisibility(v)}
@@ -144,7 +145,7 @@ export function CreateNoteModal({ onClose, onCreated, initialCoords }: Props) {
                   : "bg-surface-2 text-muted hover:text-text"
               }`}
             >
-              {v === "PRIVATE" ? "Private" : "Public"}
+              {v === "PRIVATE" ? "Private" : v === "FRIENDS" ? "Friends" : "Public"}
             </button>
           ))}
         </div>
