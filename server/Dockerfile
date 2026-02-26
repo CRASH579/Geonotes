@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci 
 
 # Copy source
 COPY . .
@@ -26,6 +26,6 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 ENV NODE_ENV=production
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["node", "dist/main.js"]
