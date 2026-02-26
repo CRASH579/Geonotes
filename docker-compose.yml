@@ -1,27 +1,27 @@
 services:
   postgres:
     image: postgis/postgis:16-3.4
+    container_name: geonotes-postgres
     environment:
       POSTGRES_DB: geonotes
       POSTGRES_USER: geonotes
-      POSTGRES_PASSWORD: secret
+      POSTGRES_PASSWORD: strongpassword
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - geonotes_pgdata:/var/lib/postgresql/data
+    restart: always
 
   backend:
-    build:
-      context: ./server
+    build: ./server
+    container_name: geonotes-backend
     environment:
-      DATABASE_URL: postgresql://geonotes:secret@postgres:5432/geonotes
-      PORT: 3000
-      NODE_ENV: development
+      DATABASE_URL: postgresql://geonotes:strongpassword@postgres:5432/geonotes
+      NODE_ENV: production
+      PORT: 3001
+    ports:
+      - "127.0.0.1:3001:3001"
     depends_on:
       - postgres
-    ports:
-      - "3000:3000"
-    command: ["/bin/sh", "-c", "npm run start:dev"]
+    restart: always
 
 volumes:
-  pgdata:
+  geonotes_pgdata:
